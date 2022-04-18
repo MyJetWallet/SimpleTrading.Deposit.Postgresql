@@ -1,0 +1,21 @@
+image: ${DOCKER_DOTNET_SDK_IMAGE}
+
+variables:
+    LIB_FOLDER: SimpleTrading.Deposit.Postgresql
+
+stages:
+  - publish-nuget
+
+publish-nuget:
+  tags: [monfex]
+  stage: publish-nuget
+  script:        
+    - cd ${LIB_FOLDER}  
+    - projectfile=${LIB_FOLDER}  
+    - ver=$(cat $projectfile.csproj | grep "<Version>")
+    - ver=${ver//[\/<>Version ]/}
+    - echo $ver
+    - dotnet pack $projectfile.csproj --configuration Release --output ./out-nuget 
+    - dotnet nuget push ./out-nuget/$projectfile.$ver.nupkg --api-key ${NUGET_PUBLISH_KEY} --source https://api.nuget.org/v3/index.json
+  only:
+    - master    
